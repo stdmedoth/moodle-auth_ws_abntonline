@@ -24,19 +24,36 @@
 
 $string['auth_function'] = 'Auth function';
 $string['auth_function_desc'] = 'The name of the function to use to authenticate users';
+
+$string['auth_token_function'] = 'Auth token function';
+$string['auth_token_function_desc'] = 'The name of the function to get token';
+
+$string['auth_token_id'] = 'ID token Login';
+$string['auth_token_id_desc'] = 'The ID to get Token';
+
+$string['auth_token_key'] = 'Key token Login';
+$string['auth_token_key_desc'] = 'The Key to get Token';
+
 $string['auth_function_password_paramname'] = 'Password parameter name';
 $string['auth_function_password_paramname_desc'] = 'Name of the paramater to send password as to the webservice.';
+
 $string['auth_function_resultClass'] = 'Result Class';
 $string['auth_function_resultClass_desc'] = 'The name of the class containing the result of webservice.';
+
 $string['auth_function_resultField'] = 'Result Field';
 $string['auth_function_resultField_desc'] = 'The field of the class containing boolean the result of webservice.';
+
 $string['auth_function_username_paramname'] = 'Username parameter name (authenticate)';
 $string['auth_function_username_paramname_desc'] = 'Name of the paramater to send username as to the webservice.';
+
 $string['auth_wsdescription'] = 'This plugin autheticates against an external webservice.';
+
 $string['changepasswordurl'] = 'Change Password URL';
 $string['changepasswordurl_desc'] = 'Your custom URL for users to change their passwords.';
+
 $string['default_params'] = 'Default parameters';
 $string['default_params_desc'] = 'Parameters to be used in every webservice call. Example: a:b,c:d,e:f';
+
 $string['pluginname'] = 'External webservice authentication';
 $string['protocol'] = 'Protocol';
 $string['protocol_desc'] = 'Protocol used by webservice. Currently only SOAP.';

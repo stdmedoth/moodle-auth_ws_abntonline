@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,156 +16,206 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Authentication Plugin: External Webservice Authentication
- *
- * Checks against an external webservice.
- *
- * @package    auth_ws
- * @author     Daniel Neis Araujo
- * @license    http://www.gnu.org/copyleft/gpl.html GNU Public License
- */
+* Authentication Plugin: External Webservice Authentication
+*
+* Checks against an external webservice.
+*
+* @package    auth_ws
+* @author     Daniel Neis Araujo
+* @license    http://www.gnu.org/copyleft/gpl.html GNU Public License
+*/
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
 
 /**
- * External webservice authentication plugin.
- */
+* External webservice authentication plugin.
+*/
 class auth_plugin_ws extends auth_plugin_base {
 
-    /**
-     * Constructor.
-     */
-    public function __construct() {
-        $this->authtype = 'ws';
-        $this->config = get_config('auth_ws');
+  /**
+  * Constructor.
+  */
+  public function __construct() {
+    $this->authtype = 'ws';
+    $this->config = get_config('auth_ws');
 
-        if (isset($this->config->default_params) && !empty($this->config->default_params)) {
-            $params = explode(',', $this->config->default_params);
-            $defaultparams = array();
-            foreach ($params as $p) {
-                list($paramname, $value) = explode(':', $p);
-                $defaultparams[$paramname] = $value;
-            }
-            $this->config->ws_default_params = $defaultparams;
-        } else {
-            $this->config->ws_default_params = array();
-        }
+    if (isset($this->config->default_params) && !empty($this->config->default_params)) {
+      $params = explode(',', $this->config->default_params);
+      $defaultparams = array();
+      foreach ($params as $p) {
+        list($paramname, $value) = explode(':', $p);
+        $defaultparams[$paramname] = $value;
+      }
+      $this->config->ws_default_params = $defaultparams;
+    } else {
+      $this->config->ws_default_params = array();
+    }
+  }
+
+  /**
+  * Returns true if the username and password work and false if they are
+  * wrong or don't exist.
+  *
+  * @param string $username The username
+  * @param string $password The password
+  * @return bool Authentication success or failure.
+  */
+  public function user_login($username, $password) {
+    $functionname = $this->config->auth_function;
+    $params  = array($this->config->auth_function_username_paramname => $username,
+    $this->config->auth_function_password_paramname => $password);
+
+    $result = $this->call_ws($this->config->serverurl, $functionname, $params);
+    if(!$result) return false;
+
+
+    global $DB, $CFG;;
+    $user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
+    if(!$user){
+
+      $full_name = explode(' ', $result->nome);
+
+      $userdata = create_user_record($username, $password, "ws");
+      $userdata->firstname = $full_name[0];
+      $userdata->lastname = end($full_name);
+      $userdata->email = $username;
+      //var_dump($userdata);
+      //die();
+      $DB->update_record('user', $userdata);
+
+    }else{
+      if(!$user->email || !$user->lastname || !$user->firstname){
+        $full_name = explode(' ', $result->nome);
+
+        $user->email = $username;
+        $user->firstname = $full_name[0];
+        $user->lastname = end($full_name);
+        $DB->update_record('user', $user);
+      }
     }
 
-    /**
-     * Returns true if the username and password work and false if they are
-     * wrong or don't exist.
-     *
-     * @param string $username The username
-     * @param string $password The password
-     * @return bool Authentication success or failure.
-     */
-    public function user_login($username, $password) {
+    return true;
+  }
 
-        $functionname = $this->config->auth_function;
-        $params  = array($this->config->auth_function_username_paramname => $username,
-                         $this->config->auth_function_password_paramname => $password);
+  /**
+  * This plugin is intended only to authenticate users.
+  * User synchronization must be done by external service,
+  * using Moodle's webservices.
+  *
+  * @param progress_trace $trace
+  * @param bool $doupdates  Optional: set to true to force an update of existing accounts
+  * @return int 0 means success, 1 means failure
+  */
+  public function sync_users(progress_trace $trace, $doupdates = false) {
+    return true;
+  }
 
-        $result = $this->call_ws($this->config->serverurl, $functionname, $params);
+  public function get_userinfo($username) {
+    return array();
+  }
 
-        return ($result->{$this->config->auth_function_resultClass}->{$this->config->auth_function_resultField} == true);
-    }
+  private function call_ws($serverurl, $functionname, $params = array()) {
 
-    /**
-     * This plugin is intended only to authenticate users.
-     * User synchronization must be done by external service,
-     * using Moodle's webservices.
-     *
-     * @param progress_trace $trace
-     * @param bool $doupdates  Optional: set to true to force an update of existing accounts
-     * @return int 0 means success, 1 means failure
-     */
-    public function sync_users(progress_trace $trace, $doupdates = false) {
-        return true;
-    }
+    $serverurl = $serverurl . '?wsdl';
 
-    public function get_userinfo($username) {
-        return array();
-    }
+    $params = array_merge($this->config->ws_default_params, $params);
 
-    private function call_ws($serverurl, $functionname, $params = array()) {
+    $token_params = [
+      "sIdentificador" => $this->config->auth_token_id,
+      "sChave" => $this->config->auth_token_key
+    ];
+    global $USER;
 
-        $serverurl = $serverurl . '?wsdl';
+    $client = new SoapClient($serverurl, array('trace' => 1));
+    try {
 
-        $params = array_merge($this->config->ws_default_params, $params);
+      $ns = "http://www.abntonline.com.br/";
+      $header = new SOAPHeader($ns, $this->config->auth_token_function, []);
+      $ent = "http://www.abntonline.com.br/";
+      $header2 = new SOAPHeader($ent, $this->config->auth_token_function, []);
 
-        $client = new SoapClient($serverurl);
-        try {
-            $resp = $client->__soapCall($functionname, array($params));
+      $result = $client->__soapCall($this->config->auth_token_function, [$token_params], [], [$header, $header2]);
+      $token = json_decode($result->GetTokenResult)->token;
+      $params['sToken'] = $token;
 
-            return $resp;
-        } catch (Exception $e) {
-            echo "Exception:\n";
-            echo $e->getMessage();
-            echo "===\n";
-            return false;
-        }
-    }
+      $result = $client->__soapCall($functionname, array($params));
+      $result_data = json_decode($result->AutenticaLoginResult);
 
-    public function prevent_local_passwords() {
-        return true;
-    }
-
-    /**
-     * Returns true if this authentication plugin is "internal".
-     *
-     * Internal plugins use password hashes from Moodle user table for authentication.
-     *
-     * @return bool
-     */
-    public function is_internal() {
+      if($result_data->erro_codigo != 0){
+        echo "Exception:\n";
+        echo $result_data->erro_mensagem;
+        echo "===\n";
         return false;
-    }
+      }
+      return $result_data->pessoa;
 
-    /**
-     * Indicates if moodle should automatically update internal user
-     * records with data from external sources using the information
-     * from auth_plugin_base::get_userinfo().
-     * The external service is responsible to update user records.
-     *
-     * @return bool true means automatically copy data from ext to user table
-     */
-    public function is_synchronised_with_external() {
-        return false;
+    } catch (SoapException $e) {
+      echo "Exception:\n";
+      echo $e->getMessage();
+      echo "===\n";
+      return false;
     }
+  }
 
-    /**
-     * Returns true if this authentication plugin can change the user's
-     * password.
-     *
-     * @return bool
-     */
-    public function can_change_password() {
-        return false;
-    }
+  public function prevent_local_passwords() {
+    return true;
+  }
 
-    /**
-     * Returns the URL for changing the user's pw, or empty if the default can
-     * be used.
-     *
-     * @return moodle_url
-     */
-    public function change_password_url() {
-        if (isset($this->config->changepasswordurl) && !empty($this->config->changepasswordurl)) {
-            return new moodle_url($this->config->changepasswordurl);
-        } else {
-            return null;
-        }
-    }
+  /**
+  * Returns true if this authentication plugin is "internal".
+  *
+  * Internal plugins use password hashes from Moodle user table for authentication.
+  *
+  * @return bool
+  */
+  public function is_internal() {
+    return false;
+  }
 
-    /**
-     * Returns true if plugin allows resetting of internal password.
-     *
-     * @return bool
-     */
-    public function can_reset_password() {
-        return false;
+  /**
+  * Indicates if moodle should automatically update internal user
+  * records with data from external sources using the information
+  * from auth_plugin_base::get_userinfo().
+  * The external service is responsible to update user records.
+  *
+  * @return bool true means automatically copy data from ext to user table
+  */
+  public function is_synchronised_with_external() {
+    return true;
+  }
+
+  /**
+  * Returns true if this authentication plugin can change the user's
+  * password.
+  *
+  * @return bool
+  */
+  public function can_change_password() {
+    return false;
+  }
+
+  /**
+  * Returns the URL for changing the user's pw, or empty if the default can
+  * be used.
+  *
+  * @return moodle_url
+  */
+  public function change_password_url() {
+    if (isset($this->config->changepasswordurl) && !empty($this->config->changepasswordurl)) {
+      return new moodle_url($this->config->changepasswordurl);
+    } else {
+      return null;
     }
+  }
+
+  /**
+  * Returns true if plugin allows resetting of internal password.
+  *
+  * @return bool
+  */
+  public function can_reset_password() {
+    return false;
+  }
 }

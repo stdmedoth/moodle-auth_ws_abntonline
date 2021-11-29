@@ -25,6 +25,17 @@
 $string['pluginname'] = 'Autenticação via webservice externo';
 $string['auth_function'] = 'Função de autenticação';
 $string['auth_function_desc'] = 'O nome da função que será invocada para autenticar os usuários.';
+
+$string['auth_token_function'] = 'Função de Token';
+$string['auth_token_function_desc'] = 'O nome da função para obter o token';
+
+$string['auth_token_id'] = 'ID login Token';
+$string['auth_token_id_desc'] = 'O ID para obter o token';
+
+$string['auth_token_key'] = 'Chave login Token';
+$string['auth_token_key_desc'] = 'A chave para obter o token';
+
+
 $string['auth_function_password_paramname'] = 'Parâmetro para senha';
 $string['auth_function_password_paramname_desc'] = 'Nome do parâmetro esperado pelo webservice para receber a senha.';
 $string['auth_function_resultClass'] = 'Classe do resultado';

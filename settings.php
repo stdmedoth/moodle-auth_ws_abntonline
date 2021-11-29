@@ -41,6 +41,16 @@ if ($ADMIN->fulltree) {
                                                 get_string('auth_function_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
+    $settings->add(new admin_setting_configtext('auth_ws/auth_token_id',
+                                                get_string('auth_token_id', 'auth_ws'),
+                                                get_string('auth_token_id_desc', 'auth_ws'),
+                                                '', PARAM_TEXT));
+
+    $settings->add(new admin_setting_configtext('auth_ws/auth_token_key',
+                                                get_string('auth_token_key', 'auth_ws'),
+                                                get_string('auth_token_key_desc', 'auth_ws'),
+                                                '', PARAM_TEXT));
+
     $settings->add(new admin_setting_configtext('auth_ws/auth_function_username_paramname',
                                                 get_string('auth_function_username_paramname', 'auth_ws'),
                                                 get_string('auth_function_username_paramname_desc', 'auth_ws'),
@@ -49,16 +59,6 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('auth_ws/auth_function_password_paramname',
                                                 get_string('auth_function_password_paramname', 'auth_ws'),
                                                 get_string('auth_function_password_paramname_desc', 'auth_ws'),
-                                                '', PARAM_TEXT));
-
-    $settings->add(new admin_setting_configtext('auth_ws/auth_function_resultClass',
-                                                get_string('auth_function_resultClass', 'auth_ws'),
-                                                get_string('auth_function_resultClass_desc', 'auth_ws'),
-                                                '', PARAM_TEXT));
-
-    $settings->add(new admin_setting_configtext('auth_ws/auth_function_resultField',
-                                                get_string('auth_function_resultField', 'auth_ws'),
-                                                get_string('auth_function_resultField_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/changepasswordurl',
