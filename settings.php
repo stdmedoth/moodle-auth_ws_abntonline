@@ -38,33 +38,34 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configtext('auth_ws/auth_function',
                                                 get_string('auth_function', 'auth_ws'),
-                                                get_string('auth_function_desc', 'auth_ws'),
+                                                //get_string('auth_function_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/auth_token_id',
-                                                get_string('auth_token_id', 'auth_ws'),
-                                                get_string('auth_token_id_desc', 'auth_ws'),
+                                                '',//get_string('auth_token_id', 'auth_ws'),
+                                                '',//get_string('auth_token_id_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/auth_token_key',
-                                                get_string('auth_token_key', 'auth_ws'),
-                                                get_string('auth_token_key_desc', 'auth_ws'),
+                                                '',//get_string('auth_token_key', 'auth_ws'),
+                                                '',//get_string('auth_token_key_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/auth_function_username_paramname',
-                                                get_string('auth_function_username_paramname', 'auth_ws'),
-                                                get_string('auth_function_username_paramname_desc', 'auth_ws'),
+                                                '',//get_string('auth_function_username_paramname', 'auth_ws'),
+                                                '',//get_string('auth_function_username_paramname_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/auth_function_password_paramname',
                                                 get_string('auth_function_password_paramname', 'auth_ws'),
-                                                get_string('auth_function_password_paramname_desc', 'auth_ws'),
+                                                //get_string('auth_function_password_paramname_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('auth_ws/changepasswordurl',
                                                 get_string('changepasswordurl', 'auth_ws'),
                                                 get_string('changepasswordurl_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
+
 
     $deleteopt = array();
     $deleteopt[AUTH_REMOVEUSER_KEEP] = get_string('auth_remove_keep', 'auth');
