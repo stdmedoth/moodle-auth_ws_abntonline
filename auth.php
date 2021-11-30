@@ -34,6 +34,7 @@ require_once($CFG->libdir.'/authlib.php');
 */
 class auth_plugin_ws extends auth_plugin_base {
 
+  private static $userinfo;
   /**
   * Constructor.
   */
@@ -74,17 +75,17 @@ class auth_plugin_ws extends auth_plugin_base {
     global $DB, $CFG;;
     $user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
     if(!$user){
-
       $full_name = explode(' ', $result->nome);
 
-      $userdata = create_user_record($username, $password, "ws");
-      $userdata->firstname = $full_name[0];
-      $userdata->lastname = end($full_name);
-      $userdata->email = $username;
-      //var_dump($userdata);
+      $static_user_info = array(
+        'username' => 'jovictor210@gmail.com',
+        'firstname' => $full_name[0],
+        'lastname' => end($full_name),
+        'email' => $username
+      );
+      $this->set_user_info($static_user_info);
+      //var_dump($this->get_userinfo($username));
       //die();
-      $DB->update_record('user', $userdata);
-
     }else{
       if(!$user->email || !$user->lastname || !$user->firstname){
         $full_name = explode(' ', $result->nome);
@@ -95,7 +96,7 @@ class auth_plugin_ws extends auth_plugin_base {
         $DB->update_record('user', $user);
       }
     }
-
+    
     return true;
   }
 
@@ -112,8 +113,13 @@ class auth_plugin_ws extends auth_plugin_base {
     return true;
   }
 
+  public function set_user_info($infos){
+    self::$userinfo = $infos;
+    return self::$userinfo;
+  }
+
   public function get_userinfo($username) {
-    return array();
+    return self::$userinfo;
   }
 
   private function call_ws($serverurl, $functionname, $params = array()) {
@@ -183,7 +189,7 @@ class auth_plugin_ws extends auth_plugin_base {
   * @return bool true means automatically copy data from ext to user table
   */
   public function is_synchronised_with_external() {
-    return true;
+    return false;
   }
 
   /**
