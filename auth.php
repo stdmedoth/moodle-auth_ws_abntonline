@@ -25,6 +25,32 @@
 * @license    http://www.gnu.org/copyleft/gpl.html GNU Public License
 */
 
+
+global $PAGE;
+//var_dump($PAGE->pagetype);
+//die();
+switch ($PAGE->pagetype) {
+  case 'my-index':
+    global $USER;
+    var_dump($USER);
+    die();
+    switch ($USER->department) {
+      case '':
+        redirect('/course/view.php?id=3');
+
+    }
+
+    break;
+
+  default:
+    // code...
+    break;
+}
+
+
+//var_dump($PAGE->settingsnav);
+//die();
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
@@ -72,16 +98,21 @@ class auth_plugin_ws extends auth_plugin_base {
     if(!$result) return false;
 
 
-    global $DB, $CFG;;
+    global $DB, $CFG;
     $user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
     if(!$user){
       $full_name = explode(' ', $result->nome);
+
+      if(count($result->conselhos)){
+
+      }
 
       $static_user_info = array(
         'username' => 'jovictor210@gmail.com',
         'firstname' => $full_name[0],
         'lastname' => end($full_name),
         'email' => $username
+        'department' => ''
       );
       $this->set_user_info($static_user_info);
       //var_dump($this->get_userinfo($username));
@@ -96,7 +127,7 @@ class auth_plugin_ws extends auth_plugin_base {
         $DB->update_record('user', $user);
       }
     }
-    
+
     return true;
   }
 
