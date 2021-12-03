@@ -31,13 +31,24 @@ global $PAGE;
 //die();
 switch ($PAGE->pagetype) {
   case 'my-index':
-    global $USER;
-    var_dump($USER);
-    die();
-    switch ($USER->department) {
-      case '':
-        redirect('/course/view.php?id=3');
-
+    global $USER, $DB, $CFG;
+    //var_dump($USER);
+    //die();
+    $user = $DB->get_record('user', array('id'=>$USER->id, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
+    $departamentos = explode(';', $user->department);
+    if(count($departamentos) == 1){
+      $departamento = end($departamentos);
+      switch ($departamento) {
+        case 'Fiscal':
+          redirect('/course/view.php?id=2');
+          break;
+        case 'Deliberativo':
+          redirect('/course/view.php?id=3');
+          break;
+        case 'Técnico':
+          redirect('/course/view.php?id=4');
+          break;
+      }
     }
 
     break;
@@ -103,16 +114,36 @@ class auth_plugin_ws extends auth_plugin_base {
     if(!$user){
       $full_name = explode(' ', $result->nome);
 
-      if(count($result->conselhos)){
-
+      // recebe todos os conselhos a qual esse login pertence
+      $conselhos = [];
+      if($result->pessoa_fisica && $result->pessoa_fisica->conselhos && count($result->pessoa_fisica->conselhos) > 1){
+        function return_descricao($conselho){
+          return $conselho->descricao;
+        }
+        $conselhos = array_map('return_descricao', $result->pessoa_fisica->conselhos);
+      }else{
+        if($result->pessoa_fisica && $result->pessoa_fisica->conselhos){
+          $conselhos = [$result->pessoa_fisica->conselhos[0]->descricao];
+        }
       }
+      if($result->pessoa_juridicas && $result->pessoa_juridicas->conselhos && count($result->pessoa_juridicas->conselhos) > 1){
+        function return_descricao($conselho){
+          return $conselho->descricao;
+        }
+        $conselhos = array_map('return_descricao', $result->pessoa_juridicas->conselhos);
+      }else{
+        if($result->pessoa_juridicas && $result->pessoa_juridicas->conselhos){
+          $conselhos = [$result->pessoa_juridicas->conselhos[0]->descricao];
+        }
+      }
+      $conselhos = implode(';', $conselhos);
 
       $static_user_info = array(
         'username' => 'jovictor210@gmail.com',
         'firstname' => $full_name[0],
         'lastname' => end($full_name),
-        'email' => $username
-        'department' => ''
+        'email' => $username,
+        'department' => $conselhos
       );
       $this->set_user_info($static_user_info);
       //var_dump($this->get_userinfo($username));
