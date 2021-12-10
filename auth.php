@@ -139,7 +139,7 @@ class auth_plugin_ws extends auth_plugin_base {
       $conselhos = implode(';', $conselhos);
 
       $static_user_info = array(
-        'username' => 'jovictor210@gmail.com',
+        'username' => $username,
         'firstname' => $full_name[0],
         'lastname' => end($full_name),
         'email' => $username,
