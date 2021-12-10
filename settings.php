@@ -41,6 +41,12 @@ if ($ADMIN->fulltree) {
                                                 //get_string('auth_function_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
+
+    $settings->add(new admin_setting_configtext('auth_ws/auth_token_function',
+                                                '',//get_string('auth_token_function', 'auth_ws'),
+                                                '',//get_string('auth_token_function_desc', 'auth_ws'),
+                                                '', PARAM_TEXT));
+
     $settings->add(new admin_setting_configtext('auth_ws/auth_token_id',
                                                 '',//get_string('auth_token_id', 'auth_ws'),
                                                 '',//get_string('auth_token_id_desc', 'auth_ws'),
