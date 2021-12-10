@@ -27,6 +27,7 @@
 
 
 global $PAGE;
+ini_set("soap.wsdl_cache_enabled", "0");
 //var_dump($PAGE->pagetype);
 //die();
 switch ($PAGE->pagetype) {
