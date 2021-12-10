@@ -51,6 +51,9 @@ switch ($PAGE->pagetype) {
           break;
       }
     }
+    if(count($departamentos) > 1){
+      redirect('/course/index.php');
+    }
 
     break;
 
