@@ -51,7 +51,7 @@ if($PAGE->pagetype == 'my-index'){
   foreach ($departamentos as $key => $departamento) {
     if(isset($departamentos_cursos[$departamento])){
       $departamento_curso_id = $departamentos_cursos[$departamento];
-      $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'status' => '1']);
+      $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'enrol' => 'manual']);
       if($enrol){
         $user_enrolments = $DB->get_record('user_enrolments', ['enrolid'=>$enrol->id]);
         if(!$user_enrolments){
