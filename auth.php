@@ -53,7 +53,7 @@ if($PAGE->pagetype == 'my-index'){
       $departamento_curso_id = $departamentos_cursos[$departamento];
       $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'enrol' => 'manual']);
       if($enrol){
-        $user_enrolments = $DB->get_record('user_enrolments', ['enrolid'=>$enrol->id]);
+        $user_enrolments = $DB->get_record('user_enrolments', ['userid' => $USER->id, 'enrolid'=>$enrol->id]);
         if(!$user_enrolments){
           $DB->insert_record('user_enrolments', (Object)[
             'status' => 0,
