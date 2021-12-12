@@ -67,6 +67,11 @@ if ($ADMIN->fulltree) {
                                                 //get_string('auth_function_password_paramname_desc', 'auth_ws'),
                                                 '', PARAM_TEXT));
 
+    $settings->add(new admin_setting_configtext('auth_ws/departments_courses_ids',
+                                                '',
+                                                '',//get_string('auth_function_password_paramname_desc', 'auth_ws'),
+                                                '', PARAM_TEXT));
+
     $settings->add(new admin_setting_configtext('auth_ws/changepasswordurl',
                                                 get_string('changepasswordurl', 'auth_ws'),
                                                 get_string('changepasswordurl_desc', 'auth_ws'),

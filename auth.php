@@ -27,41 +27,47 @@
 
 
 global $PAGE;
-ini_set("soap.wsdl_cache_enabled", "0");
-//var_dump($PAGE->pagetype);
-//die();
-switch ($PAGE->pagetype) {
-  case 'my-index':
-    global $USER, $DB, $CFG;
-    //var_dump($USER);
-    //die();
-    $user = $DB->get_record('user', array('id'=>$USER->id, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
-    $departamentos = explode(';', $user->department);
-    if(count($departamentos) == 1){
-      $departamento = end($departamentos);
-      switch ($departamento) {
-        case 'Fiscal':
-          redirect('/course/view.php?id=2');
-          break;
-        case 'Deliberativo':
-          redirect('/course/view.php?id=3');
-          break;
-        case 'Técnico':
-          redirect('/course/view.php?id=4');
-          break;
+
+$departamentos_cursos = [];
+$plugin_config = get_config('auth_ws');
+if($plugin_config){
+  if(isset($plugin_config->departments_courses_ids)){
+    $departamentos_cursos_config = $plugin_config->departments_courses_ids;
+    $departamentos_cursos_config = explode(',', $departamentos_cursos_config);
+    if($departamentos_cursos_config){
+      foreach ($departamentos_cursos_config as $key => $departamento_curso_config) {
+        $dc_key = explode(':',$departamento_curso_config);
+        $departamentos_cursos[$dc_key[0]] = $dc_key[1];
       }
     }
-    if(count($departamentos) > 1){
-      redirect('/course/index.php');
-    }
-
-    break;
-
-  default:
-    // code...
-    break;
+  }
 }
 
+if($PAGE->pagetype == 'my-index'){
+  global $USER, $DB, $CFG;
+
+  $user = $DB->get_record('user', array('id'=>$USER->id, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
+  $departamentos = explode(';', $user->department);
+  foreach ($departamentos as $key => $departamento) {
+    if(isset($departamentos_cursos[$departamento])){
+      $departamento_curso_id = $departamentos_cursos[$departamento];
+      $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'enrol' => 'manual']);
+      if($enrol){
+        $user_enrolments = $DB->get_record('user_enrolments', ['enrolid'=>$enrol->id]);
+        if(!$user_enrolments){
+          $DB->insert_record('user_enrolments', (Object)[
+            'status' => 0,
+            'enrolid' => $enrol->id,
+            'userid' => $USER->id
+          ]);
+        }
+      }
+    }
+  }
+  if(count($departamentos) == 1){
+    redirect('/course/view.php?id='.$departamentos_cursos[end($departamentos)]);
+  }
+}
 
 //var_dump($PAGE->settingsnav);
 //die();
