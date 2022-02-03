@@ -43,29 +43,32 @@ if($plugin_config){
   }
 }
 
-if($PAGE->pagetype == 'my-index'){
-  global $USER, $DB, $CFG;
+global $USER, $DB, $CFG;
 
-  $user = $DB->get_record('user', array('id'=>$USER->id, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
-  $departamentos = explode(';', $user->department);
-  foreach ($departamentos as $key => $departamento) {
-    if(isset($departamentos_cursos[$departamento])){
-      $departamento_curso_id = $departamentos_cursos[$departamento];
-      $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'enrol' => 'manual']);
-      if($enrol){
-        $user_enrolments = $DB->get_record('user_enrolments', ['userid' => $USER->id, 'enrolid'=>$enrol->id]);
-        if(!$user_enrolments){
-          $DB->insert_record('user_enrolments', (Object)[
-            'status' => 0,
-            'enrolid' => $enrol->id,
-            'userid' => $USER->id
-          ]);
-        }
+$user = $DB->get_record('user', array('id'=>$USER->id, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'ws'));
+$departamentos = explode(';', $user->department);
+$departamentos = array_unique($departamentos);
+
+foreach ($departamentos as $key => $departamento) {
+  if(isset($departamentos_cursos[$departamento])){
+    $departamento_curso_id = $departamentos_cursos[$departamento];
+    $enrol = $DB->get_record('enrol', ['courseid'=>$departamento_curso_id, 'enrol' => 'manual']);
+    if($enrol){
+      $user_enrolments = $DB->get_record('user_enrolments', ['userid' => $USER->id, 'enrolid'=>$enrol->id]);
+      if(!$user_enrolments){
+        $DB->insert_record('user_enrolments', (Object)[
+          'status' => 0,
+          'enrolid' => $enrol->id,
+          'userid' => $USER->id
+        ]);
       }
     }
   }
+}
+
+if($PAGE->pagetype == 'my-index'){
   if(count($departamentos) == 1){
-    redirect('/course/view.php?id='.$departamentos_cursos[end($departamentos)]);
+    redirect($CFG->wwwroot.'/course/view.php?id='.$departamentos_cursos[end($departamentos)]);
   }
 }
 
